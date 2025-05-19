@@ -5,7 +5,7 @@ from utilidades import *
 # Diretórios base
 PASTA_ATUAL = Path(__file__).parent
 PASTA_TEMPLATES = PASTA_ATUAL / 'templates'
-PASTA_LISTA_EMAILS = PASTA_ATUAL / 'lista_email'
+PASTA_LISTA_EMAILS = PASTA_ATUAL / 'lista_emails'
 PASTA_CONFIGURACOES = PASTA_ATUAL / 'configuracoes'
 
 # Inicializa a página padrão
