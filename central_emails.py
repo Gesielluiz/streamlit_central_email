@@ -63,50 +63,41 @@ def _enviar_email(destinatarios, titulo, corpo):
                     senha_app=chave)
 
 # ========== Templates ==========
-def pag_templates():
-    st.markdown('# Templates')
-    st.divider()
+for i, arquivo in enumerate(PASTA_TEMPLATES.glob('*.txt')):
+    nome_arquivo = arquivo.stem.replace('_', ' ').upper()
 
-    for i, arquivo in enumerate(PASTA_TEMPLATES.glob('*.txt')):
-        nome_arquivo = arquivo.stem.replace('_', ' ').upper()
+    col1, col2, col3 = st.columns([0.6, 0.2, 0.2])
 
-        col1, col2, col3 = st.columns([0.6, 0.2, 0.2])
-
-        col1.button(
-            nome_arquivo,
-            key=f'nome_template_{i}',
-            use_container_width=True,
-            on_click=_usar_template,
-            args=(nome_arquivo,)
-        )
-        col2.button(
-            'EDITAR',
-            key=f'editar_template_{i}',
-            use_container_width=True,
-            on_click=_editar_arquivo,
-            args=(nome_arquivo,)
-        )
-        col3.button(
-            'REMOVER',
-            key=f'remover_template_{i}',
-            use_container_width=True,
-            on_click=_remove_template,
-            args=(nome_arquivo,)
-        )
-
-    st.divider()
-    st.button(
-        'Adicionar Template',
-        key='botao_adicionar_template',
-        on_click=mudar_pagina,
-        args=('adicionar_novo_template',)
+    col1.button(
+        nome_arquivo,
+        key=f'nome_template_{i}',
+        use_container_width=True,
+        on_click=_usar_template,
+        args=(nome_arquivo,)
+    )
+    col2.button(
+        'EDITAR',
+        key=f'editar_template_{i}',
+        use_container_width=True,
+        on_click=_editar_arquivo,
+        args=(nome_arquivo,)
+    )
+    col3.button(
+        'REMOVER',
+        key=f'remover_template_{i}',
+        use_container_width=True,
+        on_click=_remove_template,
+        args=(nome_arquivo,)
     )
 
 
 def pag_adicionar_novo_template(nome_template='', texto_template=''):
-    nome_template = st.text_input('Nome do template', value=nome_template)
-    texto_template = st.text_area('Escreva o texto do template', value=texto_template, height=600)
-    st.button('Salvar', on_click=lambda: salvar_template(nome_template, texto_template))
+    nome_template = st.text_input('Nome do template', value=nome_template, key="input_nome_template")
+    texto_template = st.text_area('Escreva o texto do template', value=texto_template, height=600, key="input_texto_template")
+    if st.button('Salvar'):
+        salvar_template(nome_template, texto_template)
+        mudar_pagina('templates')
+
 
 def _usar_template(nome):
     texto = carregar_template(nome)
