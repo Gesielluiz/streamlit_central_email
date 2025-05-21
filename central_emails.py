@@ -7,6 +7,11 @@ from banco import (
     salvar_lista, listar_listas, remover_lista, carregar_lista
 )
 
+# Diretórios base
+PASTA_ATUAL = Path(__file__).parent
+PASTA_TEMPLATES = PASTA_ATUAL / 'templates'
+
+
 def inicializacao():
     if 'pagina_central_email' not in st.session_state:
         st.session_state.pagina_central_email = 'home'
