@@ -42,12 +42,22 @@ def home():
     col1, col2, col3 = st.columns(3)
     col1.button('Enviar email', use_container_width=True, 
                                 on_click=_enviar_email, 
-                                args=(destinatarios, titulo, corpo))
+                                args=(destinatarios, titulo, corpo, anexos))
     col3.button('Limpar', use_container_width=True, on_click=_limpar)
 
     st.session_state.destinatarios_atual = destinatarios
     st.session_state.titulo_atual = titulo
     st.session_state.corpo_atual = corpo
+
+# Anexos
+anexos = st.file_uploader(
+    "Anexar arquivos (PDF, Word, Excel, etc.)",
+    type=["pdf", "doc", "docx", "xls", "xlsx", "txt", "csv"],
+    accept_multiple_files=True
+)
+
+
+
 
 # Limpa os campos atuais
 def _limpar():
@@ -56,20 +66,31 @@ def _limpar():
     st.session_state.corpo_atual = ''
 
 
-def _enviar_email(destinatarios, titulo, corpo):
+def _enviar_email(destinatarios, titulo, corpo, anexos=None):
     destinatarios = destinatarios.replace(' ', '').split(',')
-    email_usuario = _le_email_usuario()
-    chave = _le_chave_usuario()
+    dados = carregar_configuracao()
+    email_usuario = dados["email_usuario"]
+    chave = dados["chave_email"]
+
     if email_usuario == '':
         st.error('Adicione email na página de configurações')
     elif chave == '':
         st.error('Adicione a chave de email na página de configurações')
     else:
-        envia_email(email_usuario,
-                destinatarios=destinatarios,
-                titulo=titulo,
-                corpo=corpo,
-                senha_app=chave)
+        arquivos = []
+        if anexos:
+            for arquivo in anexos:
+                arquivos.append((arquivo.name, arquivo.read()))
+
+        envia_email(
+            email_usuario,
+            destinatarios=destinatarios,
+            titulo=titulo,
+            corpo=corpo,
+            senha_app=chave,
+            anexos=arquivos
+        )
+
         
 
 # ================ TEMPLATE ================
