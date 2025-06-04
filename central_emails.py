@@ -68,9 +68,8 @@ def _limpar():
 
 def _enviar_email(destinatarios, titulo, corpo, anexos=None):
     destinatarios = destinatarios.replace(' ', '').split(',')
-    dados = carregar_configuracao()
-    email_usuario = dados["email_usuario"]
-    chave = dados["chave_email"]
+    email_usuario = _le_email_usuario()
+    chave = _le_chave_usuario()
 
     if email_usuario == '':
         st.error('Adicione email na página de configurações')
@@ -90,6 +89,7 @@ def _enviar_email(destinatarios, titulo, corpo, anexos=None):
             senha_app=chave,
             anexos=arquivos
         )
+
 
         
 
