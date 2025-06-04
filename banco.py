@@ -3,6 +3,14 @@ import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
+from banco import (
+    carregar_configuracao,  # <- ESSA LINHA É A ESSENCIAL
+    salvar_configuracao,
+    salvar_template, listar_templates, remover_template, carregar_template,
+    salvar_lista, listar_listas, remover_lista, carregar_lista
+)
+
+
 def conectar():
     url = os.getenv("DATABASE_URL")
     return psycopg2.connect(url, cursor_factory=RealDictCursor)
