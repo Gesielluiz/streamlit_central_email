@@ -7,7 +7,8 @@ import streamlit as st
 from banco import (
     carregar_configuracao, salvar_configuracao,
     salvar_template, listar_templates, remover_template, carregar_template,
-    salvar_lista, listar_listas, remover_lista, carregar_lista
+    salvar_lista, listar_listas, remover_lista, carregar_lista,
+    salvar_email_enviado
 )
 
 # Importa utilitários (troca de página, envio de e-mail, leitura de credenciais, etc.)
@@ -66,6 +67,12 @@ def home():
         accept_multiple_files=True,
     )
 
+    # restante da função …
+    col1.button('Enviar email', use_container_width=True,
+                on_click=_enviar_email,
+                args=(destinatarios, titulo, corpo, anexos))
+    # …
+
     # Recuperamos o que já estava em sessão (para preservar estados entre páginas)
     destinatarios_atual = st.session_state.destinatarios_atual
     titulo_atual = st.session_state.titulo_atual
@@ -101,35 +108,46 @@ def _limpar():
 
 
 def _enviar_email(destinatarios, titulo, corpo, anexos=None):
-    """
-    Dispara o e-mail, juntando anexos caso existam.
-    """
-    # Transforma em lista, retirando espaços
-    destinatarios = destinatarios.replace(" ", "").split(",")
+    destinatarios = destinatarios.replace(' ', '').split(',')
     email_usuario = _le_email_usuario()
     chave = _le_chave_usuario()
 
-    if email_usuario == "":
-        st.error("Adicione email na página de configurações")
+    if email_usuario == '':
+        st.error('Adicione email na página de configurações')
         return
-    if chave == "":
-        st.error("Adicione a chave de email na página de configurações")
+    if chave == '':
+        st.error('Adicione a chave de email na página de configurações')
         return
 
+    # Gera o rastreio_id em Python
+    rastreio_id = str(uuid.uuid4())
+
+    # Monta o pixel
+    pixel_url = f"https://<SEU-DOMINIO-RAILWAY>/rastreamento?id={rastreio_id}"
+    corpo_com_pixel = corpo + f'\n\n<img src="{pixel_url}" width="1" height="1" style="display:none"/>'
+
+    # Grava no banco (um registro por destinatário)
+    for d in destinatarios:
+        salvar_email_enviado(d, titulo, corpo_com_pixel, rastreio_id)
+
+    # Prepara anexos se houver
     arquivos = []
     if anexos:
         for arquivo in anexos:
             arquivos.append((arquivo.name, arquivo.read()))
 
-    # Chama a função que envia o e-mail (vinda de utilidades.py)
+    # Envia o e-mail (com pixel embutido)
     envia_email(
         email_usuario,
         destinatarios=destinatarios,
         titulo=titulo,
-        corpo=corpo,
+        corpo=corpo_com_pixel,
         senha_app=chave,
-        anexos=arquivos,
+        anexos=arquivos
     )
+
+    st.success("E-mail enviado e rastreamento criado!")
+
 
 
 #
