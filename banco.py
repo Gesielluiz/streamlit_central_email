@@ -4,6 +4,12 @@ import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
+def conectar():
+    url = os.getenv("DATABASE_URL")
+    return psycopg2.connect(url, cursor_factory=RealDictCursor)
+
+# --- LISTA EXISTENTE de funções (configuracao, template, lista)
+
 # ========== Conexão com o banco ==========
 def conectar():
     """
@@ -171,3 +177,33 @@ def carregar_lista(nome):
         return resultado["emails_lista"]
     else:
         return ""
+
+# ========== 1) SALVAR ENVIO DE EMAIL ==========
+def salvar_email_enviado(destinatario, titulo, corpo, rastreio_id):
+    conn = conectar()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        INSERT INTO email_enviado (destinatario, titulo, corpo, rastreio_id)
+        VALUES (%s, %s, %s, %s);
+        """,
+        (destinatario, titulo, corpo, rastreio_id)
+    )
+    conn.commit()
+    cur.close()
+    conn.close()
+
+# ========== 2) SALVAR RASTREAMENTO ==========
+def salvar_rastreamento(rastreio_id, ip, user_agent):
+    conn = conectar()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        INSERT INTO rastreamento (rastreio_id, ip, user_agent)
+        VALUES (%s, %s, %s);
+        """,
+        (rastreio_id, ip, user_agent)
+    )
+    conn.commit()
+    cur.close()
+    conn.close()
