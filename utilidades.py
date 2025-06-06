@@ -9,7 +9,6 @@ from email.message import EmailMessage
 from email.utils import make_msgid
 from pathlib import Path
 
-
 # ============================
 #  Função para trocar de página
 # ============================
@@ -57,92 +56,67 @@ def envia_email(email_usuario, destinatarios, titulo, corpo, senha_app, anexos=N
     """
 
     # 1) Gerar um ID único para este e-mail, que será usado na URL de rastreamento.
-    #    Você poderá salvá-lo num banco ou num CSV para depois correlacionar quem abriu.
     email_id = str(uuid.uuid4())
 
     # 2) Montar a parte “plain text” (simples) do corpo
-    texto_simples = corpo + "\n\n[Para ver imagens, habilite HTML no seu cliente de e-mail]"
+    texto_simples = corpo + "\n\n[Para visualizar este e-mail corretamente, habilite HTML no seu cliente de e-mail.]"
 
-    # 3) Montar a parte “HTML” do corpo, incluindo o pixel de rastreamento
-    #    Ajuste a URL abaixo para apontar ao endereço público+porta do seu Flask:
+    # 3) Montar a parte “HTML” do corpo, incluindo o pixel de rastreamento invisível
     #
-    #    Exemplo de URL de rastreamento:
-    #      http://<SEU_HOST>:<SUA_PORTA>/rastreamento?id=<email_id>
+    #    Ajuste a URL abaixo para apontar ao endereço público + porta do seu Flask:
+    #      exemplo: "https://meu-dominio.up.railway.app:5005"
     #
-    #    NOTE: Se estiver em desenvolvimento local, pode usar “localhost” e porta 5000,
-    #    mas lembre-se de que, em produção, isso deve virar algo como:
-    #      https://meu-dominio.com/rastreamento?id=<email_id>
-    #
-    host_pixel = "http://localhost:5000"           # <<< ajuste para o seu domínio e porta do Flask
+    host_pixel = "http://localhost:5000"  # <<< ALTERE para o seu domínio/porta Flask em produção!
     url_pixel = f"{host_pixel}/rastreamento?id={email_id}"
-    cid_pixel = make_msgid(domain="pixel")  # Gera um Content-ID se você quiser embutir via cid: no HTML
 
+    # Opcional: gerar um Content-ID (caso queira usar <img src="cid:..."> em vez de URL direta)
+    cid_pixel = make_msgid(domain="pixel_tracking")
+
+    # Corpo HTML (com nova linha convertida em <br>, e pixel de rastreamento)
     html_body = f"""
     <html>
-      <body>
-        <div style="font-family: sans-serif; line-height: 1.5;">
-          {corpo.replace('\n', '<br>')}<br><br>
-          <!-- Pixel de rastreamento transparente (1x1) -->
-          <img src="{url_pixel}" width="1" height="1" style="display:none;" alt="." />
-        </div>
+      <body style="font-family: sans-serif; line-height: 1.5;">
+        {corpo.replace('\n', '<br>')}<br><br>
+        <!-- Pixel de rastreamento transparente (1x1) -->
+        <img src="{url_pixel}" width="1" height="1" style="display:none;" alt="." />
       </body>
     </html>
     """
 
-    # 4) Começar a montar a mensagem (multipart)
-    message = EmailMessage()
-    message["From"] = email_usuario
-    message["To"] = ", ".join(destinatarios)
-    message["Subject"] = titulo
+    # 4) Caso queira usar CID em vez de URL, substitua a tag <img> acima por:
+    #    <img src="cid:{cid_pixel[1:-1]}" width="1" height="1" style="display:none;" alt="." />
+    #
+    #    E depois faça message_email.get_payload()[1].add_related( conteúdo_do_pixel, ... )
+    #    Mas aqui vamos usar apenas URL diretamente.
 
-    # Adiciona primeiro a parte de texto simples:
-    message.set_content(texto_simples)
+    # 5) Criar o EmailMessage multipart/alternative
+    message_email = EmailMessage()
+    message_email["From"] = email_usuario
+    message_email["To"] = ", ".join(destinatarios)
+    message_email["Subject"] = titulo
 
-    # Em seguida, adiciona a parte HTML (como alternativa)
-    message.add_alternative(html_body, subtype="html")
+    # 6) Parte Texto simples
+    message_email.set_content(texto_simples)
 
-    # 5) Anexar arquivos, se houver
+    # 7) Parte HTML (fallback é o texto simples acima)
+    message_email.add_alternative(html_body, subtype="html")
+
+    # 8) Anexos, se houverem
     if anexos:
         for nome_arquivo, conteudo in anexos:
-            # Extrai extensão (ex: ".pdf") para tentar deduzir o subtype; mas aqui
-            # usamos simplesmente octet-stream para forçar download:
-            message.add_attachment(
+            message_email.add_attachment(
                 conteudo,
                 maintype="application",
                 subtype="octet-stream",
-                filename=nome_arquivo,
+                filename=nome_arquivo
             )
 
-    # 6) Enviar por SMTP_SSL (Gmail)
+    # 9) Enviar via SMTP SSL (Gmail)
     context = ssl.create_default_context()
     try:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as smtp:
             smtp.login(email_usuario, senha_app)
-            smtp.send_message(message)
-        st.success("Email enviado com sucesso!")
+            smtp.send_message(message_email)
+            st.success("E-mail enviado com sucesso!")
     except Exception as e:
-        st.error(f"Erro ao enviar o email: {e}")
-        return
-
-    # ---------- Opcional: você pode salvar esse `email_id` num CSV local para
-    # posterior consulta (por ex., salvar em “logs/envios.csv” com timestamp, destinatários, etc).
-    #
-    # Exemplo simples de escrita local (opcional):
-    #
-    # from datetime import datetime
-    # LOGS_ENVIO = Path(__file__).parent / "logs_envios.csv"
-    # cabeçalho = not LOGS_ENVIO.exists()
-    # with open(LOGS_ENVIO, "a", encoding="utf-8", newline="") as f:
-    #     writer = csv.writer(f)
-    #     if cabeçalho:
-    #         writer.writerow(["email_id", "destinatarios", "titulo", "data_envio"])
-    #     writer.writerow([email_id, ";".join(destinatarios), titulo, datetime.now().isoformat()])
-    #
-    # Assim você sabe que gerou o pixel para aquele ID em determinada hora.
-
-
-# ============================
-#  Outras funções de navegação (se necessário)
-# ============================
-# — já definidas acima: mudar_pagina(), _le_email_usuario(), _le_chave_usuario()
-#
+        st.error(f"Erro ao enviar o e-mail: {e}")
