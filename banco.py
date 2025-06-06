@@ -1,5 +1,5 @@
 # banco.py
-
+import uuid
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -179,19 +179,36 @@ def carregar_lista(nome):
         return ""
 
 # ========== 1) SALVAR ENVIO DE EMAIL ==========
+
 def salvar_email_enviado(destinatario, titulo, corpo, rastreio_id):
+    """
+    Insere um registro em e_emails_enviado, associando o rastreio_id ao e-mail enviado.
+    """
     conn = conectar()
     cur = conn.cursor()
-    cur.execute(
-        """
-        INSERT INTO email_enviado (destinatario, titulo, corpo, rastreio_id)
-        VALUES (%s, %s, %s, %s);
-        """,
-        (destinatario, titulo, corpo, rastreio_id)
-    )
+    cur.execute("""
+        INSERT INTO e_emails_enviado (destinatario, titulo, corpo, rastreio_id)
+        VALUES (%s, %s, %s, %s)
+        RETURNING id;
+    """, (destinatario, titulo, corpo, rastreio_id))
+    novo_id = cur.fetchone()[0]
     conn.commit()
     cur.close()
     conn.close()
+    return novo_id
+
+def listar_emails_enviados():
+    """
+    Retorna todos os e-mails enviados (útil para exibir no painel de rastreamento).
+    Cada linha virá com: id, destinatario, titulo, corpo, rastreio_id.
+    """
+    conn = conectar()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute("SELECT * FROM e_emails_enviado ORDER BY id DESC;")
+    resultado = cur.fetchall()
+    cur.close()
+    conn.close()
+    return resultado
 
 # ========== 2) SALVAR RASTREAMENTO ==========
 def salvar_rastreamento(rastreio_id, ip, user_agent):
