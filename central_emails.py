@@ -1,5 +1,6 @@
 # central_emails.py
-
+import os
+import uuid
 from pathlib import Path
 import streamlit as st
 
@@ -8,8 +9,10 @@ from banco import (
     carregar_configuracao, salvar_configuracao,
     salvar_template, listar_templates, remover_template, carregar_template,
     salvar_lista, listar_listas, remover_lista, carregar_lista,
-    salvar_email_enviado
+    salvar_email_enviado   # ← certifique-se de que esta função exista em banco.py
 )
+
+from utilidades import *
 
 # Importa utilitários (troca de página, envio de e-mail, leitura de credenciais, etc.)
 from utilidades import (
@@ -107,36 +110,62 @@ def _limpar():
     st.session_state.corpo_atual = ""
 
 
+=import os
+import uuid
+import streamlit as st
+from banco import salvar_email_enviado
+from utilidades import envia_email
+
 def _enviar_email(destinatarios, titulo, corpo, anexos=None):
-    destinatarios = destinatarios.replace(' ', '').split(',')
+    # 1) Converte a string em lista de endereços
+    destinatarios = destinatarios.replace(" ", "").split(",")
+
+    # 2) Lê e-mail e chave de configuração
     email_usuario = _le_email_usuario()
     chave = _le_chave_usuario()
-
-    if email_usuario == '':
-        st.error('Adicione email na página de configurações')
+    if email_usuario == "":
+        st.error("Adicione email na página de configurações")
         return
-    if chave == '':
-        st.error('Adicione a chave de email na página de configurações')
+    if chave == "":
+        st.error("Adicione a chave de email na página de configurações")
         return
 
-    # Gera o rastreio_id em Python
+    # 3) Gera um UUID para rastreamento
     rastreio_id = str(uuid.uuid4())
 
-    # Monta o pixel
-    pixel_url = f"https://<SEU-DOMINIO-RAILWAY>/rastreamento?id={rastreio_id}"
-    corpo_com_pixel = corpo + f'\n\n<img src="{pixel_url}" width="1" height="1" style="display:none"/>'
+    # 4) Lê a base URL do Flask para o pixel (defina FLASK_BASE_URL nas Variáveis do Railway)
+    flask_base = os.getenv("FLASK_BASE_URL")
+    if not flask_base:
+        st.error("A variável de ambiente FLASK_BASE_URL não está definida.")
+        return
 
-    # Grava no banco (um registro por destinatário)
+    # 5) Monta a URL completa do pixel
+    #    Exemplo: "https://meuflask.up.railway.app:5005/rastreamento?id=..."
+    pixel_url = f"{flask_base}/rastreamento?id={rastreio_id}"
+
+    # 6) Injeta a tag <img> no corpo (HTML)
+    #    Se você estiver enviando em HTML, use add_alternative no utilidades.envia_email.
+    html_pixel = f'<img src="{pixel_url}" width="1" height="1" style="display:none" />'
+    corpo_com_pixel = f"{corpo}\n\n{html_pixel}"
+
+    # 7) Grava um registro por destinatário na tabela e_emails_enviado
+    #    Aqui armazenamos título e corpo_com_pixel (já com o pixel) ou apenas o corpo original,
+    #    conforme sua necessidade. Abaixo estamos salvando corpo_com_pixel.
     for d in destinatarios:
-        salvar_email_enviado(d, titulo, corpo_com_pixel, rastreio_id)
+        salvar_email_enviado(
+            d,
+            titulo,
+            corpo_com_pixel,  # você pode trocar para salvar apenas `corpo` se preferir
+            rastreio_id
+        )
 
-    # Prepara anexos se houver
+    # 8) Prepara anexos (se houver)
     arquivos = []
     if anexos:
         for arquivo in anexos:
             arquivos.append((arquivo.name, arquivo.read()))
 
-    # Envia o e-mail (com pixel embutido)
+    # 9) Por fim, dispara o e-mail com o pixel embutido
     envia_email(
         email_usuario,
         destinatarios=destinatarios,
@@ -146,8 +175,7 @@ def _enviar_email(destinatarios, titulo, corpo, anexos=None):
         anexos=arquivos
     )
 
-    st.success("E-mail enviado e rastreamento criado!")
-
+    st.success("E-mail(s) enviado(s) com rastreamento!")
 
 
 #
