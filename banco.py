@@ -113,24 +113,26 @@ def carregar_lista(nome):
     return resultado["emails_lista"] if resultado else ""
 
 # ========== E-Mails Enviado ==========
+
 def salvar_email_enviado(destinatario, titulo, corpo, rastreio_id):
     """
-    Grava um disparo em 'e-mails enviado'. Cada destinatário conta como
-    uma linha, com o mesmo rastreio_id.
+    Grava um disparo na tabela email_enviado.
     """
     conn = conectar()
     cur = conn.cursor()
     cur.execute(
+        # Troque "e-mails enviado" pelo nome correto da tabela no seu DB
         """
-        INSERT INTO "e-mails enviado" 
+        INSERT INTO email_enviado
           (destinatario, titulo, corpo, rastreio_id)
         VALUES (%s, %s, %s, %s);
         """,
-        (destinatario, titulo, corpo, rastreio_id),
+        (destinatario, titulo, corpo, rastreio_id)
     )
     conn.commit()
     cur.close()
     conn.close()
+
 
 # ========== RASTREAMENTO ==========
 def listar_rastreamentos():
