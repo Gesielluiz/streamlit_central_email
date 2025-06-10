@@ -113,7 +113,6 @@ def carregar_lista(nome):
     return resultado["emails_lista"] if resultado else ""
 
 # ========== E-Mails Enviado ==========
-
 def salvar_email_enviado(destinatario, titulo, corpo, rastreio_id):
     """
     Grava um disparo na tabela email_enviado.
@@ -121,7 +120,6 @@ def salvar_email_enviado(destinatario, titulo, corpo, rastreio_id):
     conn = conectar()
     cur = conn.cursor()
     cur.execute(
-        # Troque "e-mails enviado" pelo nome correto da tabela no seu DB
         """
         INSERT INTO email_enviado
           (destinatario, titulo, corpo, rastreio_id)
@@ -133,12 +131,11 @@ def salvar_email_enviado(destinatario, titulo, corpo, rastreio_id):
     cur.close()
     conn.close()
 
-
 # ========== RASTREAMENTO ==========
 def listar_rastreamentos():
     """
     Retorna todos os eventos de rastreamento,
-    fazendo join com a tabela 'e-mails enviado' para exibir
+    fazendo join com a tabela email_enviado para exibir
     também o destinatário e o título.
     """
     conn = conectar()
@@ -162,8 +159,8 @@ def listar_rastreamentos():
     resultado = cur.fetchall()
     cur.close()
     conn.close()
-    # Converte cada registro em dict para o Streamlit exibir facilmente
+
     colunas = ["id", "destinatario", "titulo", "rastreio_id", "ip", "user_agent", "data_hora"]
-    lista_dicts = [dict(zip(colunas, linha)) for linha in resultado]
-    return lista_dicts
+    return [dict(zip(colunas, linha)) for linha in resultado]
+
 
