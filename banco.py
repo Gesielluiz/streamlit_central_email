@@ -154,7 +154,7 @@ def listar_rastreamentos():
           r.user_agent,
           r.data_hora
         FROM rastreamento AS r
-        INNER JOIN "e-mails enviado" AS e
+        INNER JOIN email_enviado AS e
           ON r.rastreio_id = e.rastreio_id
         ORDER BY r.data_hora DESC;
         """
