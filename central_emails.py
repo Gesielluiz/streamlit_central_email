@@ -105,15 +105,10 @@ def _enviar_email(destinatarios, titulo, corpo, anexos=None):
         return
 
     # 1) Gera rastreio_id
-    rastreio_id = str(uuid.uuid4())
+     rastreio_id = str(uuid.uuid4())
 
-    # 2) Monta o pixel URL (apontando para o Flask)
-    #    Em desenvolvimento local: http://localhost:5000
-    #    Em produção: substitua por https://seu‐dominio‐final.com
-    host_pixel = "http://localhost:5000"  # <<< mude para https://<seu‐domínio>
+    host_pixel = "http://localhost:5000"
     pixel_url = f"{host_pixel}/rastreamento?id={rastreio_id}"
-
-    # 3) Corpo completo em HTML (cuidado: troca \n por <br>)
     corpo_html = (
         corpo.replace("\n", "<br>")
         + f'<br><br><img src="{pixel_url}" width="1" height="1" style="display:none;" alt="." />'
