@@ -112,16 +112,18 @@ def carregar_lista(nome):
     conn.close()
     return resultado["emails_lista"] if resultado else ""
 
+
 # ========== E-Mails Enviado ==========
 def salvar_email_enviado(destinatario, titulo, corpo, rastreio_id):
     """
-    Grava um disparo na tabela email_enviado.
+    Grava um disparo na tabela "e-mails enviado".
     """
     conn = conectar()
     cur = conn.cursor()
     cur.execute(
+        # Aqui usamos exatamente o nome da tabela existente, entre aspas duplas
         """
-        INSERT INTO email_enviado
+        INSERT INTO "e-mails enviado"
           (destinatario, titulo, corpo, rastreio_id)
         VALUES (%s, %s, %s, %s);
         """,
@@ -131,11 +133,12 @@ def salvar_email_enviado(destinatario, titulo, corpo, rastreio_id):
     cur.close()
     conn.close()
 
+
 # ========== RASTREAMENTO ==========
 def listar_rastreamentos():
     """
     Retorna todos os eventos de rastreamento,
-    fazendo join com a tabela email_enviado para exibir
+    fazendo join com a tabela "e-mails enviado" para exibir
     também o destinatário e o título.
     """
     conn = conectar()
@@ -151,7 +154,7 @@ def listar_rastreamentos():
           r.user_agent,
           r.data_hora
         FROM rastreamento AS r
-        INNER JOIN email_enviado AS e
+        INNER JOIN "e-mails enviado" AS e
           ON r.rastreio_id = e.rastreio_id
         ORDER BY r.data_hora DESC;
         """
@@ -162,5 +165,4 @@ def listar_rastreamentos():
 
     colunas = ["id", "destinatario", "titulo", "rastreio_id", "ip", "user_agent", "data_hora"]
     return [dict(zip(colunas, linha)) for linha in resultado]
-
 
