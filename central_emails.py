@@ -85,55 +85,48 @@ def home():
 
 
 def _enviar_email(destinatarios, titulo, corpo, anexos=None):
-    """
-    1) Gera UUID para rastreamento.
-    2) Monta o HTML com <img src="/rastreamento?id=...">
-    3) Grava cada destinatário em e-mails enviado
-    4) Chama utilidades.envia_email(...)
-    """
-    # Clean e split dos destinatários
-    lista_dest = [d.strip() for d in destinatarios.split(",") if d.strip()]
+    # 1) Converte string em lista
+    destinatarios = destinatarios.replace(" ", "").split(",")
 
     email_usuario = _le_email_usuario()
-    chave = _le_chave_usuario()
-
-    if not email_usuario:
-        st.error("Adicione email na página de configurações")
-        return
-    if not chave:
-        st.error("Adicione a chave de email na página de configurações")
+    chave        = _le_chave_usuario()
+    if not email_usuario or not chave:
+        st.error("Configurações faltando")
         return
 
-    # 1) Gera rastreio_id
-     rastreio_id = str(uuid.uuid4())
+    # GERA RASTREIO_ID
+    rastreio_id = str(uuid.uuid4())
 
-    host_pixel = "https://web-production-5e67a.up.railway.app"
-    pixel_url = f"{host_pixel}/rastreamento?id={rastreio_id}"
+    # MONTA URL DO PIXEL
+    host_pixel = os.getenv("FLASK_BASE_URL") or "http://localhost:5000"
+    pixel_url  = f"{host_pixel}/rastreamento?id={rastreio_id}"
 
+    # MONTA HTML COM PIXEL
     corpo_html = (
         corpo.replace("\n", "<br>")
-        + f'<br><br><img src="{pixel_url}" width="1" height="1" style="display:none;" alt="." />'
+        + f'<br><br><img src="{pixel_url}" width="1" height="1" style="display:none;" />'
     )
 
-    # 4) Para cada destinatário, grava em "e-mails enviado"
-    for d in lista_dest:
+    # GRAVA NO DB
+    for d in destinatarios:
         salvar_email_enviado(d, titulo, corpo_html, rastreio_id)
 
-    # 5) Prepara anexos
+    # PREPARA ANEXOS
     arquivos = []
     if anexos:
         for arquivo in anexos:
             arquivos.append((arquivo.name, arquivo.read()))
 
-    # 6) Dispara o e-mail (já com o corpo_html que embute o pixel)
+    # ENVIA E-MAIL
     envia_email(
         email_usuario=email_usuario,
-        destinatarios=lista_dest,
+        destinatarios=destinatarios,
         titulo=titulo,
         corpo=corpo_html,
         senha_app=chave,
         anexos=arquivos,
     )
+
 
 
 # ================================
