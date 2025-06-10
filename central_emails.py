@@ -89,30 +89,31 @@ def _enviar_email(destinatarios, titulo, corpo, anexos=None):
     # 1) Converte string em lista
     destinatarios = destinatarios.replace(" ", "").split(",")
 
+    # 2) Lê e-mail e chave
     email_usuario = _le_email_usuario()
     chave = _le_chave_usuario()
     if not email_usuario or not chave:
         st.error("Configurações faltando")
         return
 
-    # GERA RASTREIO_ID
+    # 3) Gera rastreio_id
     rastreio_id = str(uuid.uuid4())
 
-    # MONTA URL DO PIXEL
+    # 4) Monta URL do pixel usando FLASK_BASE_URL
     host_pixel = os.getenv("FLASK_BASE_URL") or "http://localhost:5000"
     pixel_url = f"{host_pixel}/rastreamento?id={rastreio_id}"
 
-    # MONTA HTML COM PIXEL
-   corpo_html = (
+    # 5) CORPO_HTML: — **atente-se ao recuo DE 8 espaços** (2 níveis de indentação)
+    corpo_html = (
         corpo.replace("\n", "<br>")
         + f'<br><br><img src="{pixel_url}" width="1" height="1" style="display:none;" />'
     )
 
-    # GRAVA NO DB
+    # 6) Grava no DB
     for d in destinatarios:
         salvar_email_enviado(d, titulo, corpo_html, rastreio_id)
 
-    # PREPARA ANEXOS
+    # 7) Prepara anexos
     arquivos = []
     if anexos:
         for arquivo in anexos:
@@ -127,7 +128,6 @@ def _enviar_email(destinatarios, titulo, corpo, anexos=None):
         senha_app=chave,
         anexos=arquivos,
     )
-
 
 
 # ================================
