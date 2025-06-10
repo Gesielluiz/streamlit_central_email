@@ -1,8 +1,9 @@
 # central_emails.py
+
 from pathlib import Path
-import streamlit as st
-import uuid
 import os
+import uuid
+import streamlit as st
 
 # Importa tudo do banco (já com salvar_email_enviado e listar_rastreamentos)
 from banco import (
@@ -103,7 +104,7 @@ def _enviar_email(destinatarios, titulo, corpo, anexos=None):
     host_pixel = os.getenv("FLASK_BASE_URL") or "http://localhost:5000"
     pixel_url = f"{host_pixel}/rastreamento?id={rastreio_id}"
 
-    # 5) CORPO_HTML: — **atente-se ao recuo DE 8 espaços** (2 níveis de indentação)
+    # 5) Constrói o corpo HTML com pixel
     corpo_html = (
         corpo.replace("\n", "<br>")
         + f'<br><br><img src="{pixel_url}" width="1" height="1" style="display:none;" />'
