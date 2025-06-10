@@ -107,8 +107,9 @@ def _enviar_email(destinatarios, titulo, corpo, anexos=None):
     # 1) Gera rastreio_id
      rastreio_id = str(uuid.uuid4())
 
-    host_pixel = "http://localhost:5000"
+    host_pixel = "https://web-production-5e67a.up.railway.app"
     pixel_url = f"{host_pixel}/rastreamento?id={rastreio_id}"
+
     corpo_html = (
         corpo.replace("\n", "<br>")
         + f'<br><br><img src="{pixel_url}" width="1" height="1" style="display:none;" alt="." />'
