@@ -2,6 +2,7 @@
 from pathlib import Path
 import streamlit as st
 import uuid
+import os
 
 # Importa tudo do banco (já com salvar_email_enviado e listar_rastreamentos)
 from banco import (
@@ -89,7 +90,7 @@ def _enviar_email(destinatarios, titulo, corpo, anexos=None):
     destinatarios = destinatarios.replace(" ", "").split(",")
 
     email_usuario = _le_email_usuario()
-    chave        = _le_chave_usuario()
+    chave = _le_chave_usuario()
     if not email_usuario or not chave:
         st.error("Configurações faltando")
         return
@@ -99,10 +100,10 @@ def _enviar_email(destinatarios, titulo, corpo, anexos=None):
 
     # MONTA URL DO PIXEL
     host_pixel = os.getenv("FLASK_BASE_URL") or "http://localhost:5000"
-    pixel_url  = f"{host_pixel}/rastreamento?id={rastreio_id}"
+    pixel_url = f"{host_pixel}/rastreamento?id={rastreio_id}"
 
     # MONTA HTML COM PIXEL
-    corpo_html = (
+   corpo_html = (
         corpo.replace("\n", "<br>")
         + f'<br><br><img src="{pixel_url}" width="1" height="1" style="display:none;" />'
     )
@@ -117,7 +118,7 @@ def _enviar_email(destinatarios, titulo, corpo, anexos=None):
         for arquivo in anexos:
             arquivos.append((arquivo.name, arquivo.read()))
 
-    # ENVIA E-MAIL
+    # 8) Envia o e-mail
     envia_email(
         email_usuario=email_usuario,
         destinatarios=destinatarios,
