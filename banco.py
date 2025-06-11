@@ -3,12 +3,12 @@ import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
+
 def conectar():
-    """
-    Conecta usando a variável de ambiente DATABASE_URL.
-    """
-    url = os.getenv("DATABASE_URL")
+    # Tenta primeiro a URL nova, senão cai na original
+    url = os.getenv("NEW_DATABASE_URL") or os.getenv("DATABASE_URL")
     return psycopg2.connect(url, cursor_factory=RealDictCursor)
+
 
 # ========== CONFIGURAÇÃO ==========
 def salvar_configuracao(email, chave):
