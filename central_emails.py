@@ -1,7 +1,9 @@
 # central_emails.py
 
 import os, streamlit as st
-st.write("▶ DATABASE_URL =", os.getenv("DATABASE_URL"))
+
+st.write("DATABASE_URL =", os.getenv("DATABASE_URL"))
+
 
 from pathlib import Path
 import os
