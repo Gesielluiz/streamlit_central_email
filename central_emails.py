@@ -297,21 +297,21 @@ def _btn_salvar_conf(email, chave):
     salvar_configuracao(email, chave)
     st.success("Configuração salva!")
 
-# =======================================
-#  PÁGINA: RASTREAMENTO (nova sessão)
-# =======================================
+
+# ========= PÁGINA: RASTREAMENTO =========
+
+
 def pag_rastreamento():
-    """
-    Exibe uma tabela com todos os eventos de rastreamento
-    (quem abriu cada e-mail, IP, user_agent, data_hora).
-    """
     st.markdown("# Rastreamento de Abertura")
     st.divider()
-    lista = listar_rastreamentos()
-    if lista:
-        st.dataframe(lista)
+    # Busca todos os eventos já salvos no banco
+    eventos = listar_rastreamentos()
+    if eventos:
+        # Exibe numa tabela interativa
+        st.dataframe(eventos)
     else:
-        st.info("Ainda não há eventos de rastreamento registrados.")
+        st.info("Ainda não há eventos de rastreamento cadastrados.")
+
 
 
 # ================ MAIN ==================
