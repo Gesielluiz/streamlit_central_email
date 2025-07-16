@@ -48,6 +48,30 @@ def _limpar():
     st.session_state.titulo_atual = ""
     st.session_state.corpo_atual = ""
 
+def _enviar_email(destinatarios, titulo, corpo, arquivos):
+    destinatarios = [d.strip() for d in destinatarios.split(",") if d.strip()]
+
+    email_usuario = _le_email_usuario()
+    chave = _le_chave_usuario()
+
+    if not email_usuario or not chave:
+        st.error("Por favor, configure seu e-mail e chave na página de Configuração.")
+        return
+
+    lista_anexos = []
+    if arquivos:
+        for arq in arquivos:
+            lista_anexos.append((arq.name, arq.read()))
+
+    envia_email(
+        email_usuario=email_usuario,
+        destinatarios=destinatarios,
+        titulo=titulo,
+        corpo=corpo,
+        senha_app=chave,
+        anexos=lista_anexos
+    )
+
 def home():
     destinatarios_atual = st.session_state.destinatarios_atual
     titulo_atual = st.session_state.titulo_atual
@@ -59,7 +83,6 @@ def home():
     titulo = st.text_input('Título do email:', value=titulo_atual)
     corpo = st.text_area('Digite o email:', value=corpo_atual, height=400)
     
-    # 📎 Campo para anexar arquivos (opcional)
     arquivos = st.file_uploader("Anexar arquivos", accept_multiple_files=True)
 
     col1, col2, col3 = st.columns(3)
@@ -75,17 +98,8 @@ def home():
     st.session_state.titulo_atual = titulo
     st.session_state.corpo_atual = corpo
 
-    try:
-        envia_email(
-            email_usuario=email_usuario,
-            destinatarios=destinatarios,
-            titulo=titulo,
-            corpo=corpo,
-            senha_app=chave,
-            anexos=[]
-        )
-    except Exception as e:
-        st.error(f"Erro ao enviar email: {e}")
+# (demais funções pag_templates, pag_lista_email, pag_configuracao, main etc. continuam igual)
+
 
 # =======================
 # TEMPLATES
