@@ -56,12 +56,13 @@ def envia_email(email_usuario, destinatarios, titulo, corpo, senha_app, anexos=N
         )
 
     # 3) Envia via SMTP_SSL
-    context = ssl.create_default_context()
-    try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as smtp:
-            smtp.login(email_usuario, senha_app)
-            smtp.send_message(msg)
+   context = ssl.create_default_context()
+try:
+    with smtplib.SMTP("smtp.qpservice.com.br", 587) as smtp:
+        smtp.starttls(context=context)
+        smtp.login(email_usuario, senha_app)
+        smtp.send_message(msg)
         st.success("Email enviado com sucesso!")
-    except Exception as e:
-        st.error(f"Erro ao enviar o email: {e}")
+except Exception as e:
+    st.error(f"Erro ao enviar o email: {e}")
 
