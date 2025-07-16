@@ -75,10 +75,11 @@ def envia_email(
 
     context = ssl.create_default_context()
     try:
-        with smtplib.SMTP("smtp.kinghost.net", 587) as smtp:
-            smtp.starttls(context=context)
-            smtp.login(email_usuario, senha_app)
-            smtp.send_message(msg)
+        with smtplib.SMTP("smtp.kinghost.net", 587, timeout=10) as smtp:
+    smtp.starttls(context=context)
+    smtp.login("Qpservice@qpservice.com.br", "Director$08")
+    smtp.send_message(msg)
+
         st.success("Email enviado com sucesso!")
     except Exception as e:
         st.error(f"Erro ao enviar e‑mail: {e}")
