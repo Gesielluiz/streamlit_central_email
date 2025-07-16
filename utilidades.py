@@ -57,10 +57,12 @@ def envia_email(email_usuario, destinatarios, titulo, corpo, senha_app, anexos=N
 
     # 3) Envia via SMTP_SSL
 
-context = ssl.create_default_context()
+import ssl
+import smtplib
 
+context = ssl.create_default_context()
 try:
-    with smtplib.SMTP("smtp.qpservice.com.br", 587) as smtp:
+    with smtplib.SMTP("smtp.kinghost.net", 587) as smtp:
         smtp.starttls(context=context)
         smtp.login(email_usuario, senha_app)
         smtp.send_message(msg)
