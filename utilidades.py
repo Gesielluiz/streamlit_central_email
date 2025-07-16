@@ -34,7 +34,7 @@ def _le_chave_usuario():
 # ============================
 def envia_email(email_usuario, destinatarios, titulo, corpo, senha_app, anexos=None):
     """
-    Monta uma mensagem e envia via SMTP_SSL.
+    Monta uma mensagem e envia via SMTP.
     - destinatarios: lista de strings
     - anexos: list of (filename, bytes)
     """
@@ -43,7 +43,7 @@ def envia_email(email_usuario, destinatarios, titulo, corpo, senha_app, anexos=N
     msg["From"] = email_usuario
     msg["To"] = ", ".join(destinatarios)
     msg["Subject"] = titulo
-    msg.set_content(corpo)  # corpo em texto simples
+    msg.set_content(corpo)
 
     # 2) Adiciona anexos, se houver
     anexos = anexos or []
@@ -55,19 +55,17 @@ def envia_email(email_usuario, destinatarios, titulo, corpo, senha_app, anexos=N
             filename=nome_arquivo,
         )
 
-    # 3) Envia via SMTP_SSL
+    # 3) Envia via SMTP
+    context = ssl.create_default_context()
+    try:
+        with smtplib.SMTP("smtp.kinghost.net", 587) as smtp:
+            smtp.starttls(context=context)
+            smtp.login(email_usuario, senha_app)
+            smtp.send_message(msg)
+            st.success("Email enviado com sucesso!")
+    except Exception as e:
+        st.error(f"Erro ao enviar o email: {e}")
 
-import ssl
-import smtplib
 
-context = ssl.create_default_context()
-try:
-    with smtplib.SMTP("smtp.kinghost.net", 587) as smtp:
-        smtp.starttls(context=context)
-        smtp.login(email_usuario, senha_app)
-        smtp.send_message(msg)
-        st.success("Email enviado com sucesso!")
-except Exception as e:
-    st.error(f"Erro ao enviar o email: {e}")
 
 
