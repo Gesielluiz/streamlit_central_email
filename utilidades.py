@@ -17,21 +17,21 @@ def mudar_pagina(nome_pagina):
 PASTA_CONFIGURACOES = Path(__file__).parent / "configuracoes"
 PASTA_CONFIGURACOES.mkdir(parents=True, exist_ok=True)
 
-def _salvar_email(email):
+def _salvar_email(email: str):
     try:
         with open(PASTA_CONFIGURACOES / "email_usuario.txt", "w", encoding="utf-8") as f:
             f.write(email.strip())
     except Exception as e:
         st.error(f"Erro ao salvar email: {e}")
 
-def _salvar_chave(chave):
+def _salvar_chave(chave: str):
     try:
         with open(PASTA_CONFIGURACOES / "chave.txt", "w", encoding="utf-8") as f:
             f.write(chave.strip())
     except Exception as e:
         st.error(f"Erro ao salvar chave: {e}")
 
-def _le_email_usuario():
+def _le_email_usuario() -> str:
     try:
         arquivo = PASTA_CONFIGURACOES / "email_usuario.txt"
         if arquivo.exists():
@@ -40,7 +40,7 @@ def _le_email_usuario():
         st.error(f"Erro ao ler email: {e}")
     return ""
 
-def _le_chave_usuario():
+def _le_chave_usuario() -> str:
     try:
         arquivo = PASTA_CONFIGURACOES / "chave.txt"
         if arquivo.exists():
@@ -78,14 +78,8 @@ def envia_email(email_usuario, destinatarios, titulo, corpo, senha_app, anexos=N
         with smtplib.SMTP("smtp.kinghost.net", 587) as smtp:
             smtp.starttls(context=context)
             smtp.login(email_usuario, senha_app)
-            smtp.send_message(msg)
-        st.success("Email enviado com sucesso!")
-    except smtplib.SMTPAuthenticationError:
-        st.error("Falha na autenticação: verifique o e-mail e a chave.")
-    except smtplib.SMTPConnectError:
-        st.error("Não foi possível conectar ao servidor SMTP.")
-    except Exception as e:
-        st.error(f"Erro ao enviar o email: {e}")
+            smt
+
 
 
 
