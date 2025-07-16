@@ -291,32 +291,42 @@ def _editar_lista(nome):
 # =====================================
 #  PÁGINA: CONFIGURAÇÃO (Leitura/Grava)
 # =====================================
+# ============ CONFIGURAÇÕES ============
 def pag_configuracao():
-    st.markdown("# Configurações")
-    dados = carregar_configuracao()
-    email = st.text_input("Digite o seu email:", value=dados["email_usuario"])
-    chave = st.text_input("Digite a chave de email:", value=dados["chave_email"])
-    st.button("Salvar", key="btn_salvar_conf", on_click=_btn_salvar_conf, args=(email, chave))
+    st.markdown('# Configurações')
+    email = st.text_input('Digite o seu email:')
+    st.button('Salvar', key='salvar_email',
+                        on_click=_salvar_email,
+                        args=(email, ))
+    
+    chave = st.text_input('Digite a chave de email:')
+    st.button('Salvar chave', key='salvar_chave',
+                        on_click=_salvar_chave,
+                        args=(chave, ))
 
-def _btn_salvar_conf(email, chave):
-    salvar_configuracao(email, chave)
-    st.success("Configuração salva!")
+def _salvar_email(email):
+    PASTA_CONFIGURACOES.mkdir(exist_ok=True)
+    with open(PASTA_CONFIGURACOES / 'email_usuario.txt', 'w') as f:
+        f.write(email)
 
+def _salvar_chave(chave):
+    PASTA_CONFIGURACOES.mkdir(exist_ok=True)
+    with open(PASTA_CONFIGURACOES / 'chave.txt', 'w') as f:
+        f.write(chave)
 
-# ========= PÁGINA: RASTREAMENTO =========
+def _le_email_usuario():
+    PASTA_CONFIGURACOES.mkdir(exist_ok=True)
+    if (PASTA_CONFIGURACOES / 'email_usuario.txt').exists():
+        with open(PASTA_CONFIGURACOES / 'email_usuario.txt', 'r') as f:
+            return f.read()
+    return ''
 
-
-def pag_rastreamento():
-    st.markdown("# Rastreamento de Abertura")
-    st.divider()
-    # Busca todos os eventos já salvos no banco
-    eventos = listar_rastreamentos()
-    if eventos:
-        # Exibe numa tabela interativa
-        st.dataframe(eventos)
-    else:
-        st.info("Ainda não há eventos de rastreamento cadastrados.")
-
+def _le_chave_usuario():
+    PASTA_CONFIGURACOES.mkdir(exist_ok=True)
+    if (PASTA_CONFIGURACOES / 'chave.txt').exists():
+        with open(PASTA_CONFIGURACOES / 'chave.txt', 'r') as f:
+            return f.read()
+    return ''
 
 
 # ================ MAIN ==================
