@@ -51,14 +51,19 @@ def _le_chave_usuario() -> str:
 # ============================
 #  Envio de E-mail (com anexos)
 # ============================
-def envia_email_kinghost(email_usuario, destinatarios, titulo, corpo, senha_app, anexos=None):
+def envia_email(
+    email_usuario, destinatarios, titulo, corpo, senha_app, anexos=None
+):
+    """
+    Monta a mensagem e envia usando KingHost (STARTTLS na porta 587).
+    """
     msg = EmailMessage()
     msg["From"]    = email_usuario
     msg["To"]      = ", ".join(destinatarios)
     msg["Subject"] = titulo
     msg.set_content(corpo)
 
-    # se tiver anexos
+    # anexos (se houver)
     if anexos:
         for nome, dados in anexos:
             msg.add_attachment(
@@ -70,7 +75,6 @@ def envia_email_kinghost(email_usuario, destinatarios, titulo, corpo, senha_app,
 
     context = ssl.create_default_context()
     try:
-        # STARTTLS via 587
         with smtplib.SMTP("smtp.kinghost.net", 587) as smtp:
             smtp.starttls(context=context)
             smtp.login(email_usuario, senha_app)
@@ -78,6 +82,7 @@ def envia_email_kinghost(email_usuario, destinatarios, titulo, corpo, senha_app,
         st.success("Email enviado com sucesso!")
     except Exception as e:
         st.error(f"Erro ao enviar e‑mail: {e}")
+
 
 
 
