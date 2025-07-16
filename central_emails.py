@@ -261,15 +261,22 @@ def _editar_lista(nome):
 # ============ CONFIGURAÇÕES ============
 def pag_configuracao():
     st.markdown('# Configurações')
-    email = st.text_input('Digite o seu email:')
-    st.button('Salvar', key='salvar_email',
-                        on_click=_salvar_email,
-                        args=(email, ))
-    
-    chave = st.text_input('Digite a chave de email:')
-    st.button('Salvar chave', key='salvar_chave',
-                        on_click=_salvar_chave,
-                        args=(chave, ))
+
+    # Lê valores salvos
+    email_salvo = _le_email_usuario()
+    chave_salva = _le_chave_usuario()
+
+    # Campos com valores pré-preenchidos
+    email = st.text_input('Digite o seu email:', value=email_salvo)
+    if st.button('Salvar', key='salvar_email'):
+        _salvar_email(email)
+        st.success('Email salvo com sucesso!')
+
+    chave = st.text_input('Digite a chave de email:', value=chave_salva, type="password")
+    if st.button('Salvar chave', key='salvar_chave'):
+        _salvar_chave(chave)
+        st.success('Chave salva com sucesso!')
+
 
 def _salvar_email(email):
     PASTA_CONFIGURACOES.mkdir(exist_ok=True)
