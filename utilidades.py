@@ -1,4 +1,3 @@
-# utilidades.py
 import ssl
 import smtplib
 import streamlit as st
@@ -78,7 +77,9 @@ def envia_email(email_usuario, destinatarios, titulo, corpo, senha_app, anexos=N
         with smtplib.SMTP("smtp.kinghost.net", 587) as smtp:
             smtp.starttls(context=context)
             smtp.login(email_usuario, senha_app)
-            smt
+            smtp.send_message(msg)
+    except Exception as e:
+        st.error(f"Erro ao enviar e-mail: {e}")
 
 
 
