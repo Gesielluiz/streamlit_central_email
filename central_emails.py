@@ -80,30 +80,31 @@ def home():
 
 
 def _enviar_email(destinatarios, titulo, corpo, anexos=None):
-    destinatarios = [d.strip() for d in destinatarios.replace(" ", "").split(",") if d.strip()]
+    # limpa e quebra
+    destinatarios = [d.strip() for d in destinatarios.split(",") if d.strip()]
 
     email_usuario = _le_email_usuario()
-    chave = _le_chave_usuario()
+    chave         = _le_chave_usuario()
     if not email_usuario or not chave:
-        st.error("Configurações faltando: defina email e chave na página de Configuração.")
+        st.error("Por favor, configure seu e‑mail e chave na página de Configuração")
         return
 
+    # monta lista de arquivos [(nome, bytes), ...]
     arquivos = []
     if anexos:
         for arquivo in anexos:
             arquivos.append((arquivo.name, arquivo.read()))
 
-    for d in destinatarios:
-        salvar_email_enviado(d, titulo, corpo)
-
+    # dispara o email, passando mesmo que arquivos = []
     envia_email(
         email_usuario=email_usuario,
         destinatarios=destinatarios,
         titulo=titulo,
         corpo=corpo,
         senha_app=chave,
-        anexos=arquivos,
+        anexos=arquivos
     )
+
 
 # ================================
 #  PÁGINA: TEMPLATES
