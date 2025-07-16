@@ -206,45 +206,39 @@ def _editar_lista(nome):
     mudar_pagina("editar_lista")
 
 # ============ CONFIGURAÇÕES ============
+
 def pag_configuracao():
     st.markdown('# Configurações')
-    email = st.text_input('Digite o seu email:')
-    st.button('Salvar', key='salvar_email', on_click=_salvar_email, args=(email,))
-    chave = st.text_input('Digite a chave de email:')
-    st.button('Salvar chave', key='salvar_chave', on_click=_salvar_chave, args=(chave,))
+
+    email = st.text_input('Digite o seu email:', value=_le_email_usuario())
+    if st.button('Salvar'):
+        _salvar_email(email)
+        st.success("Email salvo com sucesso!")
+
+    chave = st.text_input('Digite a chave de email:', type='password', value=_le_chave_usuario())
+    if st.button('Salvar chave'):
+        _salvar_chave(chave)
+        st.success("Chave salva com sucesso!")
 
 def _salvar_email(email):
-    PASTA_CONFIGURACOES.mkdir(exist_ok=True)
     with open(PASTA_CONFIGURACOES / 'email_usuario.txt', 'w') as f:
         f.write(email)
 
 def _salvar_chave(chave):
-    PASTA_CONFIGURACOES.mkdir(exist_ok=True)
     with open(PASTA_CONFIGURACOES / 'chave.txt', 'w') as f:
         f.write(chave)
 
 def _le_email_usuario():
-    if (PASTA_CONFIGURACOES / 'email_usuario.txt').exists():
-        with open(PASTA_CONFIGURACOES / 'email_usuario.txt', 'r') as f:
-            return f.read()
+    caminho = PASTA_CONFIGURACOES / 'email_usuario.txt'
+    if caminho.exists():
+        return caminho.read_text().strip()
     return ''
 
 def _le_chave_usuario():
-    if (PASTA_CONFIGURACOES / 'chave.txt').exists():
-        with open(PASTA_CONFIGURACOES / 'chave.txt', 'r') as f:
-            return f.read()
+    caminho = PASTA_CONFIGURACOES / 'chave.txt'
+    if caminho.exists():
+        return caminho.read_text().strip()
     return ''
-
-def pag_rastreamento():
-    st.markdown('# Painel de Rastreamento')
-    st.markdown('Visualize aqui os e-mails abertos pelos destinatários.')
-    arquivo_logs = PASTA_RASTREAMENTO / 'logs.csv'
-    if not arquivo_logs.exists():
-        st.info('Nenhum rastreamento registrado ainda.')
-        return
-    df = pd.read_csv(arquivo_logs)
-    st.dataframe(df)
-    st.bar_chart(df['email'].value_counts())
 
 # =======================
 # MAIN
