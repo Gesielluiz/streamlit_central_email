@@ -1,5 +1,6 @@
 import ssl
 import smtplib
+import socket
 import streamlit as st
 from email.message import EmailMessage
 from pathlib import Path
@@ -52,42 +53,50 @@ def _le_chave_usuario() -> str:
 #  Envio de E-mail (com anexos)
 # ============================
 def envia_email(
-    email_usuario,
-    destinatarios: list[str],
-    titulo: str,
-    corpo: str,
-    senha_app: str,
-    anexos: list[tuple[str, bytes]] | None = None,
+    email_usuario, destinatarios, titulo, corpo, senha_app, anexos=None
 ):
     """
-    Monta a mensagem e envia usando KingHost (STARTTLS na porta 587).
-    - destinatarios: lista de strings
-    - anexos: lista de tuples (nome_arquivo, dados_bytes)
+    Monta a mensagem e envia usando KingHost (STARTTLS na porta 587),
+    forçando resolução IPv4 para evitar Errno 99.
     """
-    # 1) Cria o objeto de e‑mail
+    # 1) Prepara o EmailMessage
     msg = EmailMessage()
     msg["From"]    = email_usuario
     msg["To"]      = ", ".join(destinatarios)
     msg["Subject"] = titulo
     msg.set_content(corpo)
 
-    # 2) Anexa arquivos, se houver
+    # 2) Anexos (se houver)
     if anexos:
-        for nome, conteudo in anexos:
+        for nome, dados in anexos:
             msg.add_attachment(
-                conteudo,
+                dados,
                 maintype="application",
                 subtype="octet-stream",
                 filename=nome,
             )
 
-    # 3) Envia via SMTP STARTTLS (porta 587)
+    # 3) Contexto TLS
     context = ssl.create_default_context()
+
     try:
-        with smtplib.SMTP("smtp.kinghost.net", 587, timeout=10) as smtp:
-            smtp.starttls(context=context)
-            smtp.login(email_usuario, senha_app)
-            smtp.send_message(msg)
+        # 4) Resolve apenas IPv4 para smtp.kinghost.net:587
+        infos = socket.getaddrinfo(
+            "smtp.kinghost.net",
+            587,
+            socket.AF_INET,          # só IPv4
+            socket.SOCK_STREAM
+        )
+        ipv4_addr, ipv4_port = infos[0][4]
+
+        # 5) Conecta manualmente ao IPv4
+        smtp = smtplib.SMTP(timeout=10)
+        smtp.connect(ipv4_addr, ipv4_port)
+        smtp.starttls(context=context)
+        smtp.login(email_usuario, senha_app)
+        smtp.send_message(msg)
+        smtp.quit()
+
         st.success("Email enviado com sucesso!")
     except Exception as e:
         st.error(f"Erro ao enviar e‑mail: {e}")
