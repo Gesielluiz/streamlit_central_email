@@ -49,28 +49,31 @@ def _limpar():
     st.session_state.corpo_atual = ""
 
 def home():
-    st.markdown('# Central de Emails')
+    destinatarios_atual = st.session_state.destinatarios_atual
+    titulo_atual = st.session_state.titulo_atual
+    corpo_atual = st.session_state.corpo_atual
 
-    destinatarios = st.text_input('Destinatários do email:', value=st.session_state.destinatarios_atual)
-    titulo = st.text_input('Título do email:', value=st.session_state.titulo_atual)
-    corpo = st.text_area('Digite o email:', value=st.session_state.corpo_atual, height=400)
+    st.markdown('# Central de Emails')
+    
+    destinatarios = st.text_input('Destinatários do email:', value=destinatarios_atual)
+    titulo = st.text_input('Título do email:', value=titulo_atual)
+    corpo = st.text_area('Digite o email:', value=corpo_atual, height=400)
+    
+    # 📎 Campo para anexar arquivos (opcional)
+    arquivos = st.file_uploader("Anexar arquivos", accept_multiple_files=True)
 
     col1, col2, col3 = st.columns(3)
-    col1.button('Enviar email', use_container_width=True, on_click=_enviar_email, args=(destinatarios, titulo, corpo))
+    col1.button(
+        'Enviar email',
+        use_container_width=True,
+        on_click=_enviar_email,
+        args=(destinatarios, titulo, corpo, arquivos)
+    )
     col3.button('Limpar', use_container_width=True, on_click=_limpar)
 
     st.session_state.destinatarios_atual = destinatarios
     st.session_state.titulo_atual = titulo
     st.session_state.corpo_atual = corpo
-
-def _enviar_email(destinatarios, titulo, corpo):
-    destinatarios = [d.strip() for d in destinatarios.split(',') if d.strip()]
-    email_usuario = _le_email_usuario()
-    chave = _le_chave_usuario()
-
-    if not email_usuario or not chave:
-        st.error("Por favor, configure seu e-mail e chave na página de Configuração.")
-        return
 
     try:
         envia_email(
