@@ -15,15 +15,6 @@ from banco import (
     salvar_email_enviado,
 )
 
-from utilidades import (
-    mudar_pagina,
-    envia_email,
-    _le_email_usuario,
-    _le_chave_usuario,
-    _salvar_email,
-    _salvar_chave    
-)
-
 
 # Diretórios base
 PASTA_ATUAL = Path(__file__).parent
