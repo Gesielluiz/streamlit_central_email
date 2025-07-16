@@ -25,6 +25,7 @@ from utilidades import (
     PASTA_CONFIGURACOES
 )
 
+
 # Diretórios base
 PASTA_ATUAL = Path(__file__).parent
 PASTA_TEMPLATES = PASTA_ATUAL / "templates"
