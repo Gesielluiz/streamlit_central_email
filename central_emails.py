@@ -60,64 +60,48 @@ def _limpar():
 #  PÁGINA: HOME (Envio)
 # =========================
 
+# ================= HOME =================
 def home():
     destinatarios_atual = st.session_state.destinatarios_atual
     titulo_atual = st.session_state.titulo_atual
     corpo_atual = st.session_state.corpo_atual
 
-    st.markdown("# Central de Emails")
-    destinatarios = st.text_input("Destinatários do email:", value=destinatarios_atual)
-    titulo = st.text_input("Título do email:", value=titulo_atual)
-    corpo = st.text_area("Digite o email:", value=corpo_atual, height=300)
+    st.markdown('# Central de Emails')
+    destinatarios = st.text_input('Destinatários do email:', value=destinatarios_atual)
+    titulo = st.text_input('Título do email:', value=titulo_atual)
+    corpo = st.text_area('Digite o email:', value=corpo_atual, height=400)
+    col1, col2, col3 = st.columns(3)
+    col1.button('Enviar email', use_container_width=True, 
+                                on_click=_enviar_email, 
+                                args=(destinatarios, titulo, corpo))
+    col3.button('Limpar', use_container_width=True, on_click=_limpar)
 
-    anexos = st.file_uploader(
-        "Anexar arquivos (PDF, Word, Excel, etc.)",
-        type=["pdf", "doc", "docx", "xls", "xlsx", "txt", "csv"],
-        accept_multiple_files=True,
-    )
-
-    col1, col2 = st.columns([0.5, 0.5])
-    col1.button(
-        "Enviar email",
-        use_container_width=True,
-        on_click=_enviar_email,
-        args=(destinatarios, titulo, corpo, anexos),
-    )
-    col2.button("Limpar", use_container_width=True, on_click=_limpar)
-
-    # Armazena no state
     st.session_state.destinatarios_atual = destinatarios
     st.session_state.titulo_atual = titulo
     st.session_state.corpo_atual = corpo
 
-    st.write("Remetente lido:", email_usuario)
-    st.write("Senha lida:", '*' * len(chave))
+# Limpa os campos atuais
+def _limpar():
+    st.session_state.destinatarios_atual = ''
+    st.session_state.titulo_atual = ''
+    st.session_state.corpo_atual = ''
 
-def _enviar_email(destinatarios, titulo, corpo, anexos=None):
-    # limpa e quebra
-    destinatarios = [d.strip() for d in destinatarios.split(",") if d.strip()]
 
+def _enviar_email(destinatarios, titulo, corpo):
+    destinatarios = destinatarios.replace(' ', '').split(',')
     email_usuario = _le_email_usuario()
-    chave         = _le_chave_usuario()
-    if not email_usuario or not chave:
-        st.error("Por favor, configure seu e‑mail e chave na página de Configuração")
-        return
-
-    # monta lista de arquivos [(nome, bytes), ...]
-    arquivos = []
-    if anexos:
-        for arquivo in anexos:
-            arquivos.append((arquivo.name, arquivo.read()))
-
-    # dispara o email, passando mesmo que arquivos = []
-    envia_email(
-        email_usuario=email_usuario,
-        destinatarios=destinatarios,
-        titulo=titulo,
-        corpo=corpo,
-        senha_app=chave,
-        anexos=arquivos
-    )
+    chave = _le_chave_usuario()
+    if email_usuario == '':
+        st.error('Adicione email na página de configurações')
+    elif chave == '':
+        st.error('Adicione a chave de email na página de configurações')
+    else:
+        envia_email(email_usuario,
+                destinatarios=destinatarios,
+                titulo=titulo,
+                corpo=corpo,
+                senha_app=chave),
+                anexos=arquivos
 
 
 # ================================
