@@ -16,6 +16,18 @@ from banco import (
     carregar_lista,
     salvar_email_enviado,
 )
+
+from utilidades import (
+    mudar_pagina,
+    envia_email,
+    _le_email_usuario,
+    _le_chave_usuario,
+    _salvar_email,
+    _salvar_chave,
+    PASTA_CONFIGURACOES
+)
+
+
 from utilidades import mudar_pagina, envia_email, _le_email_usuario, _le_chave_usuario
 
 # Diretórios base (para arquivos locais)
@@ -78,6 +90,8 @@ def home():
     st.session_state.titulo_atual = titulo
     st.session_state.corpo_atual = corpo
 
+    st.write("Remetente lido:", email_usuario)
+    st.write("Senha lida:", '*' * len(chave))
 
 def _enviar_email(destinatarios, titulo, corpo, anexos=None):
     # limpa e quebra
