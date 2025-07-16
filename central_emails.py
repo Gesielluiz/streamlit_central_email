@@ -205,30 +205,46 @@ def _editar_lista(nome):
     st.session_state.texto_lista_editar = texto_arquivo
     mudar_pagina("editar_lista")
 
-# =======================
-# CONFIGURAÇÃO
-# =======================
+# ============ CONFIGURAÇÕES ============
 def pag_configuracao():
     st.markdown('# Configurações')
+    email = st.text_input('Digite o seu email:')
+    st.button('Salvar', key='salvar_email', on_click=_salvar_email, args=(email,))
+    chave = st.text_input('Digite a chave de email:')
+    st.button('Salvar chave', key='salvar_chave', on_click=_salvar_chave, args=(chave,))
 
-    email_salvo = _le_email_usuario()
-    chave_salva = _le_chave_usuario()
+def _salvar_email(email):
+    PASTA_CONFIGURACOES.mkdir(exist_ok=True)
+    with open(PASTA_CONFIGURACOES / 'email_usuario.txt', 'w') as f:
+        f.write(email)
 
-    email = st.text_input('Digite o seu email:', value=email_salvo or "")
-    if st.button('Salvar', key='salvar_email'):
-        if email.strip():
-            _salvar_email(email)
-            st.success('Email salvo com sucesso!')
-        else:
-            st.warning('Digite um e-mail válido.')
+def _salvar_chave(chave):
+    PASTA_CONFIGURACOES.mkdir(exist_ok=True)
+    with open(PASTA_CONFIGURACOES / 'chave.txt', 'w') as f:
+        f.write(chave)
 
-    chave = st.text_input('Digite a chave de email:', value=chave_salva or "", type="password")
-    if st.button('Salvar chave', key='salvar_chave'):
-        if chave.strip():
-            _salvar_chave(chave)
-            st.success('Chave salva com sucesso!')
-        else:
-            st.warning('Digite uma chave válida.')
+def _le_email_usuario():
+    if (PASTA_CONFIGURACOES / 'email_usuario.txt').exists():
+        with open(PASTA_CONFIGURACOES / 'email_usuario.txt', 'r') as f:
+            return f.read()
+    return ''
+
+def _le_chave_usuario():
+    if (PASTA_CONFIGURACOES / 'chave.txt').exists():
+        with open(PASTA_CONFIGURACOES / 'chave.txt', 'r') as f:
+            return f.read()
+    return ''
+
+def pag_rastreamento():
+    st.markdown('# Painel de Rastreamento')
+    st.markdown('Visualize aqui os e-mails abertos pelos destinatários.')
+    arquivo_logs = PASTA_RASTREAMENTO / 'logs.csv'
+    if not arquivo_logs.exists():
+        st.info('Nenhum rastreamento registrado ainda.')
+        return
+    df = pd.read_csv(arquivo_logs)
+    st.dataframe(df)
+    st.bar_chart(df['email'].value_counts())
 
 # =======================
 # MAIN
