@@ -305,38 +305,51 @@ def main():
     inicializacao()
 
     st.sidebar.button(
-        "Central de Emails", use_container_width=True, on_click=mudar_pagina, args=("home",)
+        'Central de Emails',
+        use_container_width=True,
+        on_click=mudar_pagina,
+        args=('home',)
     )
     st.sidebar.button(
-        "Templates", use_container_width=True, on_click=mudar_pagina, args=("templates",)
+        'Templates',
+        use_container_width=True,
+        on_click=mudar_pagina,
+        args=('templates',)
     )
     st.sidebar.button(
-        "Lista de Emails", use_container_width=True, on_click=mudar_pagina, args=("lista_emails",)
+        'Lista de Emails',
+        use_container_width=True,
+        on_click=mudar_pagina,
+        args=('lista_emails',)
     )
     st.sidebar.button(
-        "Configuração", use_container_width=True, on_click=mudar_pagina, args=("configuracao",)
+        'Configuração',
+        use_container_width=True,
+        on_click=mudar_pagina,
+        args=('configuracao',)
     )
 
-        pagina = st.session_state.pagina_central_email
-
-    if pagina == "home":
+    pagina = st.session_state.pagina_central_email
+    if pagina == 'home':
         home()
-    elif pagina == "templates":
+    elif pagina == 'templates':
         pag_templates()
-    elif pagina == "adicionar_novo_template":
+    elif pagina == 'adicionar_novo_template':
         pag_adicionar_novo_template()
-    elif pagina == "editar_template":
-        # pega o nome e texto que o _editar_arquivo guardou
-        nome = st.session_state.get("nome_template_editar", "")
-        texto = st.session_state.get("texto_template_editar", "")
-        pag_adicionar_novo_template(nome, texto)
-    elif pagina == "lista_emails":
+    elif pagina == 'editar_template':
+        nome_template_editar = st.session_state.nome_template_editar
+        texto_template_editar = st.session_state.texto_template_editar
+        pag_adicionar_novo_template(nome_template_editar, texto_template_editar)
+    elif pagina == 'lista_emails':
         pag_lista_email()
-    elif pagina == "adicionar_nova_lista":
+    elif pagina == 'adicionar_nova_lista':
         pag_adicionar_nova_lista()
-    elif pagina == "editar_lista":
-        # seu código de editar lista…
-        ...
-    elif pagina == "configuracao":
+    elif pagina == 'editar_lista':
+        nome_lista = st.session_state.nome_lista_editar
+        texto_lista = st.session_state.texto_lista_editar
+        pag_adicionar_nova_lista(nome_lista, texto_lista)
+    elif pagina == 'configuracao':
         pag_configuracao()
 
+if __name__ == '__main__':
+    main()
