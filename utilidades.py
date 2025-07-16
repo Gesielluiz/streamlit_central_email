@@ -52,41 +52,42 @@ def _le_chave_usuario() -> str:
 #  Envio de E-mail (com anexos)
 # ============================
 def envia_email(
-    email_usuario, destinatarios, titulo, corpo, senha_app, anexos=None
+    email_usuario,
+    destinatarios: list[str],
+    titulo: str,
+    corpo: str,
+    senha_app: str,
+    anexos: list[tuple[str, bytes]] | None = None,
 ):
     """
     Monta a mensagem e envia usando KingHost (STARTTLS na porta 587).
+    - destinatarios: lista de strings
+    - anexos: lista de tuples (nome_arquivo, dados_bytes)
     """
+    # 1) Cria o objeto de e‑mail
     msg = EmailMessage()
     msg["From"]    = email_usuario
     msg["To"]      = ", ".join(destinatarios)
     msg["Subject"] = titulo
     msg.set_content(corpo)
 
-    # anexos (se houver)
+    # 2) Anexa arquivos, se houver
     if anexos:
-        for nome, dados in anexos:
+        for nome, conteudo in anexos:
             msg.add_attachment(
-                dados,
+                conteudo,
                 maintype="application",
                 subtype="octet-stream",
                 filename=nome,
             )
 
+    # 3) Envia via SMTP STARTTLS (porta 587)
     context = ssl.create_default_context()
     try:
         with smtplib.SMTP("smtp.kinghost.net", 587, timeout=10) as smtp:
-    smtp.starttls(context=context)
-    smtp.login("Qpservice@qpservice.com.br", "Director$08")
-    smtp.send_message(msg)
-
+            smtp.starttls(context=context)
+            smtp.login(email_usuario, senha_app)
+            smtp.send_message(msg)
         st.success("Email enviado com sucesso!")
     except Exception as e:
         st.error(f"Erro ao enviar e‑mail: {e}")
-
-
-
-
-
-
-
